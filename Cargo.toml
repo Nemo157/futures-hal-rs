@@ -1,0 +1,13 @@
+[package]
+authors = ["Wim Looman <wim.looman@kiwi.ki>"]
+name = "futures-hal"
+version = "0.1.0"
+
+[dependencies]
+embedded-hal = "0.1.2"
+nb = "0.1.1"
+
+[dependencies.futures-core]
+git = "https://github.com/Nemo157/futures-rs"
+optional = false
+rev = "target_has_atomic"
