@@ -60,10 +60,11 @@ where
     type Error = !;
 
     fn poll(mut self: Pin<Self>, _: &mut Context) -> Poll<Self::Item, Self::Error> {
-        let countdown = self.countdown
+        match self.countdown
             .as_mut()
-            .expect("Cannot poll after completion");
-        match countdown.wait() {
+            .expect("Cannot poll after completion")
+            .wait()
+        {
             Ok(()) => Ok(Async::Ready(self.countdown.take().unwrap())),
             Err(nb::Error::WouldBlock) => Ok(Async::Pending),
         }
