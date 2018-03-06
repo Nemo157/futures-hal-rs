@@ -8,6 +8,8 @@ extern crate futures_core as futures;
 
 use futures::{Async, Future, Poll, task::Context};
 
+pub use hal::digital::OutputPin;
+
 pub trait CountDown: Sized {
     type Time;
     type Future: Future<Item = Self, Error = !>;
