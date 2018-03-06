@@ -1,35 +1,50 @@
 #![no_std]
-
 #![feature(never_type)]
+#![feature(arbitrary_self_types)]
 
-extern crate nb;
+extern crate anchor_experiment;
 extern crate embedded_hal as hal;
 extern crate futures_core as futures;
+extern crate futures_stable as stable;
+extern crate nb;
 
 use core::time::Duration;
 
-use futures::{Async, Future, Poll, task::Context};
+use anchor_experiment::{MovePinned, Pin};
+use futures::{Async, Poll, task::Context};
+use stable::StableFuture;
 
 pub use hal::digital::OutputPin;
 
 pub trait CountDown: Sized {
-    type Future: Future<Item = Self, Error = !>;
+    type Future: StableFuture<Item = Self, Error = !>;
 
     fn start(self, count: Duration) -> Self::Future;
 }
 
-pub struct CountDownRunning<C: hal::timer::CountDown> {
+pub struct CountDownRunning<C>
+where
+    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+{
     countdown: Option<C>,
 }
 
-impl<C: hal::timer::CountDown<Time=Duration>> CountDownRunning<C> {
+impl<C> CountDownRunning<C>
+where
+    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+{
     fn new(mut countdown: C, count: Duration) -> Self {
         hal::timer::CountDown::start(&mut countdown, count);
-        CountDownRunning { countdown: Some(countdown) }
+        CountDownRunning {
+            countdown: Some(countdown),
+        }
     }
 }
 
-impl<C: hal::timer::CountDown<Time=Duration>> CountDown for C {
+impl<C> CountDown for C
+where
+    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+{
     type Future = CountDownRunning<C>;
 
     fn start(self, count: Duration) -> Self::Future {
@@ -37,12 +52,18 @@ impl<C: hal::timer::CountDown<Time=Duration>> CountDown for C {
     }
 }
 
-impl<C: hal::timer::CountDown<Time=Duration>> Future for CountDownRunning<C> {
+impl<C> StableFuture for CountDownRunning<C>
+where
+    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+{
     type Item = C;
     type Error = !;
 
-    fn poll(&mut self, _: &mut Context) -> Poll<Self::Item, Self::Error> {
-        match self.countdown.as_mut().expect("Cannot poll after completion").wait() {
+    fn poll(mut self: Pin<Self>, _: &mut Context) -> Poll<Self::Item, Self::Error> {
+        let countdown = self.countdown
+            .as_mut()
+            .expect("Cannot poll after completion");
+        match countdown.wait() {
             Ok(()) => Ok(Async::Ready(self.countdown.take().unwrap())),
             Err(nb::Error::WouldBlock) => Ok(Async::Pending),
         }

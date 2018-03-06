@@ -7,7 +7,16 @@ version = "0.1.0"
 embedded-hal = "0.1.2"
 nb = "0.1.1"
 
+[dependencies.anchor-experiment]
+git = "https://github.com/withoutboats/anchor_experiment"
+default-features = false
+
+[dependencies.futures-stable]
+git = "https://github.com/Nemo157/futures-stable"
+branch = "target_has_atomic"
+default-features = false
+
 [dependencies.futures-core]
 git = "https://github.com/Nemo157/futures-rs"
-rev = "target_has_atomic"
+branch = "target_has_atomic"
 default-features = false
