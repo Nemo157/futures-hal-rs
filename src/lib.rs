@@ -6,38 +6,38 @@ extern crate nb;
 extern crate embedded_hal as hal;
 extern crate futures_core as futures;
 
+use core::time::Duration;
+
 use futures::{Async, Future, Poll, task::Context};
 
 pub use hal::digital::OutputPin;
 
 pub trait CountDown: Sized {
-    type Time;
     type Future: Future<Item = Self, Error = !>;
 
-    fn start<T: Into<Self::Time>>(self, count: T) -> Self::Future;
+    fn start(self, count: Duration) -> Self::Future;
 }
 
 pub struct CountDownRunning<C: hal::timer::CountDown> {
     countdown: Option<C>,
 }
 
-impl<C: hal::timer::CountDown> CountDownRunning<C> {
-    fn new<T: Into<C::Time>>(mut countdown: C, count: T) -> Self {
+impl<C: hal::timer::CountDown<Time=Duration>> CountDownRunning<C> {
+    fn new(mut countdown: C, count: Duration) -> Self {
         hal::timer::CountDown::start(&mut countdown, count);
         CountDownRunning { countdown: Some(countdown) }
     }
 }
 
-impl<C: hal::timer::CountDown> CountDown for C {
-    type Time = <C as hal::timer::CountDown>::Time;
+impl<C: hal::timer::CountDown<Time=Duration>> CountDown for C {
     type Future = CountDownRunning<C>;
 
-    fn start<T: Into<Self::Time>>(self, count: T) -> Self::Future {
-        CountDownRunning::new(self, count.into())
+    fn start(self, count: Duration) -> Self::Future {
+        CountDownRunning::new(self, count)
     }
 }
 
-impl<C: hal::timer::CountDown> Future for CountDownRunning<C> {
+impl<C: hal::timer::CountDown<Time=Duration>> Future for CountDownRunning<C> {
     type Item = C;
     type Error = !;
 
