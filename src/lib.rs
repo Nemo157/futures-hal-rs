@@ -25,6 +25,12 @@ pub trait CountDown: Sized {
     fn start(self, count: Duration) -> Self::Future;
 }
 
+pub trait Periodic: CountDown {
+    type Stream: Stream<Item = (), Error = !>;
+
+    fn periodic(self, count: Duration) -> Self::Stream;
+}
+
 pub trait DetectingInputPin {
     type Stream: Stream<Item = (), Error = !>;
 

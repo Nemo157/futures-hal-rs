@@ -4,7 +4,7 @@ use nb;
 use hal;
 use futures::{Async, Poll, Future, Stream, task::Context};
 
-use {CancellableFuture, CountDown, DetectingInputPin, Event};
+use {CancellableFuture, CountDown, Periodic, DetectingInputPin, Event};
 
 pub struct CountDownRunning<C>
 where
@@ -36,6 +36,17 @@ where
     }
 }
 
+impl<C> Periodic for C
+where
+    C: hal::timer::CountDown<Time = Duration> + hal::timer::Periodic,
+{
+    type Stream = CountDownRunning<C>;
+
+    fn periodic(self, count: Duration) -> Self::Future {
+        CountDownRunning::new(self, count)
+    }
+}
+
 impl<C> Future for CountDownRunning<C>
 where
     C: hal::timer::CountDown<Time = Duration>,
@@ -50,6 +61,25 @@ where
             .wait()
         {
             Ok(()) => Ok(Async::Ready(self.countdown.take().unwrap())),
+            Err(nb::Error::WouldBlock) => Ok(Async::Pending),
+        }
+    }
+}
+
+impl<C> Stream for CountDownRunning<C>
+where
+    C: hal::timer::CountDown<Time = Duration> + hal::timer::Periodic,
+{
+    type Item = ();
+    type Error = !;
+
+    fn poll_next(&mut self, _: &mut Context) -> Poll<Option<Self::Item>, Self::Error> {
+        match self.countdown
+            .as_mut()
+            .expect("Cannot poll after completion")
+            .wait()
+        {
+            Ok(()) => Ok(Async::Ready(Some(()))),
             Err(nb::Error::WouldBlock) => Ok(Async::Pending),
         }
     }
