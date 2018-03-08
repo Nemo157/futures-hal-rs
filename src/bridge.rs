@@ -4,7 +4,7 @@ use nb;
 use hal;
 use futures::{Async, Poll, Future, Stream, task::Context};
 
-use {CancellableFuture, CountDown, Periodic, DetectingInputPin, Event};
+use {Cancellable, CountDown, Periodic, DetectingInputPin, Event};
 
 pub struct CountDownRunning<C>
 where
@@ -85,10 +85,12 @@ where
     }
 }
 
-impl<C> CancellableFuture for CountDownRunning<C>
+impl<C> Cancellable for CountDownRunning<C>
 where
     C: hal::timer::CountDown<Time = Duration>,
 {
+    type Item = C;
+
     fn cancel(mut self) -> Self::Item {
         self.countdown.take().expect("Cannot cancel after completion")
     }
