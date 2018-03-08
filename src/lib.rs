@@ -10,10 +10,9 @@ extern crate nb;
 
 use core::time::Duration;
 
-use stable::StableFuture;
+use stable::{StableFuture, StableStream};
 
-pub use hal::digital::OutputPin;
-pub use hal::digital::InputPin;
+pub use hal::digital::{InputPin, OutputPin, Event};
 
 pub mod bridge;
 
@@ -21,4 +20,10 @@ pub trait CountDown: Sized {
     type Future: StableFuture<Item = Self, Error = !>;
 
     fn start(self, count: Duration) -> Self::Future;
+}
+
+pub trait DetectingInputPin {
+    type Stream: StableStream<Item = (), Error = !>;
+
+    fn detect(self, event: Event) -> Self::Stream;
 }

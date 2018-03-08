@@ -37,3 +37,7 @@ branch = "atomic-std-only"
 [patch.crates-io.futures-util]
 git = "https://github.com/Nemo157/futures-rs"
 branch = "atomic-std-only"
+
+[patch.crates-io.embedded-hal]
+git = "https://github.com/Nemo157/embedded-hal"
+branch = "input-edges"

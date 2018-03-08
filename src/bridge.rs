@@ -4,9 +4,9 @@ use nb;
 use hal;
 use pin_api::{PinMut, Unpin};
 use futures::{Async, Poll, task::Context};
-use stable::StableFuture;
+use stable::{StableFuture, StableStream};
 
-use CountDown;
+use {CountDown, DetectingInputPin, Event};
 
 pub struct CountDownRunning<C>
 where
@@ -52,6 +52,47 @@ where
             .wait()
         {
             Ok(()) => Ok(Async::Ready(self.countdown.take().unwrap())),
+            Err(nb::Error::WouldBlock) => Ok(Async::Pending),
+        }
+    }
+}
+
+pub struct Detector<I> where I: hal::digital::DetectingInputPin + Unpin {
+    detector: I::Detector,
+}
+
+impl<I> Detector<I>
+where
+    I: hal::digital::DetectingInputPin + Unpin,
+{
+    fn new(pin: I, event: Event) -> Self {
+        Detector {
+            detector: pin.detect(event),
+        }
+    }
+}
+
+impl<I> DetectingInputPin for I
+where
+    I: hal::digital::DetectingInputPin + Unpin,
+{
+    type Stream = Detector<I>;
+
+    fn detect(self, event: Event) -> Self::Stream {
+        Detector::new(self, event)
+    }
+}
+
+impl<I> StableStream for Detector<I>
+where
+    I: hal::digital::DetectingInputPin + Unpin,
+{
+    type Item = ();
+    type Error = !;
+
+    fn poll_next(self: PinMut<Self>, _: &mut Context) -> Poll<Option<Self::Item>, Self::Error> {
+        match hal::digital::Detector::poll(&self.detector) {
+            Ok(()) => Ok(Async::Ready(Some(()))),
             Err(nb::Error::WouldBlock) => Ok(Async::Pending),
         }
     }
