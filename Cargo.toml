@@ -21,3 +21,19 @@ default-features = false
 [dependencies.embedded-hal]
 version = "0.1.2"
 features = ["unproven"]
+
+[patch.crates-io.futures]
+git = "https://github.com/Nemo157/futures-rs"
+branch = "atomic-std-only"
+[patch.crates-io.futures-core]
+git = "https://github.com/Nemo157/futures-rs"
+branch = "atomic-std-only"
+[patch.crates-io.futures-executor]
+git = "https://github.com/Nemo157/futures-rs"
+branch = "atomic-std-only"
+[patch.crates-io.futures-io]
+git = "https://github.com/Nemo157/futures-rs"
+branch = "atomic-std-only"
+[patch.crates-io.futures-util]
+git = "https://github.com/Nemo157/futures-rs"
+branch = "atomic-std-only"
