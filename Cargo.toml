@@ -4,7 +4,6 @@ name = "futures-hal"
 version = "0.1.0"
 
 [dependencies]
-embedded-hal = "0.1.2"
 nb = "0.1.1"
 
 [dependencies.anchor-experiment]
@@ -20,3 +19,7 @@ default-features = false
 git = "https://github.com/Nemo157/futures-rs"
 branch = "target_has_atomic"
 default-features = false
+
+[dependencies.embedded-hal]
+version = "0.1.2"
+features = ["unproven"]
