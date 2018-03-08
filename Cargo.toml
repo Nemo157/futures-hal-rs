@@ -10,10 +10,6 @@ nb = "0.1.1"
 version = "0.1.1"
 default-features = false
 
-[dependencies.futures-stable]
-version = "0.2.0-alpha"
-default-features = false
-
 [dependencies.futures-core]
 version = "0.2.0-alpha"
 default-features = false

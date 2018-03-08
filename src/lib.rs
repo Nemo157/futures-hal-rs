@@ -5,25 +5,24 @@
 extern crate pin_api;
 extern crate embedded_hal as hal;
 extern crate futures_core as futures;
-extern crate futures_stable as stable;
 extern crate nb;
 
 use core::time::Duration;
 
-use stable::{StableFuture, StableStream};
+use futures::{Future, Stream};
 
 pub use hal::digital::{InputPin, OutputPin, Event};
 
 pub mod bridge;
 
 pub trait CountDown: Sized {
-    type Future: StableFuture<Item = Self, Error = !>;
+    type Future: Future<Item = Self, Error = !>;
 
     fn start(self, count: Duration) -> Self::Future;
 }
 
 pub trait DetectingInputPin {
-    type Stream: StableStream<Item = (), Error = !>;
+    type Stream: Stream<Item = (), Error = !>;
 
     fn detect(self, event: Event) -> Self::Stream;
 }
