@@ -2,7 +2,7 @@
 #![feature(never_type)]
 #![feature(arbitrary_self_types)]
 
-extern crate anchor_experiment;
+extern crate pin_api;
 extern crate embedded_hal as hal;
 extern crate futures_core as futures;
 extern crate futures_stable as stable;

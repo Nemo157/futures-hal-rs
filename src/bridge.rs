@@ -2,7 +2,7 @@ use core::time::Duration;
 
 use nb;
 use hal;
-use anchor_experiment::{MovePinned, Pin};
+use pin_api::{PinMut, Unpin};
 use futures::{Async, Poll, task::Context};
 use stable::StableFuture;
 
@@ -10,14 +10,14 @@ use CountDown;
 
 pub struct CountDownRunning<C>
 where
-    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+    C: hal::timer::CountDown<Time = Duration> + Unpin,
 {
     countdown: Option<C>,
 }
 
 impl<C> CountDownRunning<C>
 where
-    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+    C: hal::timer::CountDown<Time = Duration> + Unpin,
 {
     fn new(mut countdown: C, count: Duration) -> Self {
         hal::timer::CountDown::start(&mut countdown, count);
@@ -29,7 +29,7 @@ where
 
 impl<C> CountDown for C
 where
-    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+    C: hal::timer::CountDown<Time = Duration> + Unpin,
 {
     type Future = CountDownRunning<C>;
 
@@ -40,12 +40,12 @@ where
 
 impl<C> StableFuture for CountDownRunning<C>
 where
-    C: hal::timer::CountDown<Time = Duration> + MovePinned,
+    C: hal::timer::CountDown<Time = Duration> + Unpin,
 {
     type Item = C;
     type Error = !;
 
-    fn poll(mut self: Pin<Self>, _: &mut Context) -> Poll<Self::Item, Self::Error> {
+    fn poll(mut self: PinMut<Self>, _: &mut Context) -> Poll<Self::Item, Self::Error> {
         match self.countdown
             .as_mut()
             .expect("Cannot poll after completion")
