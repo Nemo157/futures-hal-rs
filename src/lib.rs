@@ -15,8 +15,12 @@ pub use hal::digital::{InputPin, OutputPin, Event};
 
 pub mod bridge;
 
+pub trait CancellableFuture: Future {
+    fn cancel(self) -> Self::Item;
+}
+
 pub trait CountDown: Sized {
-    type Future: Future<Item = Self, Error = !>;
+    type Future: CancellableFuture<Item = Self, Error = !>;
 
     fn start(self, count: Duration) -> Self::Future;
 }
