@@ -6,10 +6,6 @@ version = "0.1.0"
 [dependencies]
 nb = "0.1.1"
 
-[dependencies.pin-api]
-version = "0.1.1"
-default-features = false
-
 [dependencies.futures-core]
 version = "0.2.0-alpha"
 default-features = false
