@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(never_type)]
+#![feature(exhaustive_patterns)]
 #![feature(arbitrary_self_types)]
 
 extern crate embedded_hal as hal;
